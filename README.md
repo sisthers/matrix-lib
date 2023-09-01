@@ -10,6 +10,10 @@ Run tests:
 ```
 make test
 ```
+Coverage:
+```
+makee gcov_report
+~~~
 
 
 
