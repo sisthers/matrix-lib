@@ -14,6 +14,10 @@ Coverage:
 ```
 make gcov_report
 ```
+Leaks:
+```
+make leaks
+```
 
 
 
