@@ -12,8 +12,8 @@ make test
 ```
 Coverage:
 ```
-makee gcov_report
-~~~
+make gcov_report
+```
 
 
 
