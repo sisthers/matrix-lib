@@ -2,19 +2,20 @@
 Matrix library, written in C++, made as an educational project for School 21.
 
 ## Usage
-Download:
+
+### Download:
 ```
 git clone https://github.com/sisthers/matrix-lib.git
 ```
-Run tests:
+### Run tests:
 ```
 make test
 ```
-Coverage:
+### Coverage:
 ```
 make gcov_report
 ```
-Leaks:
+### Leaks:
 ```
 make leaks
 ```
