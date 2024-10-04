@@ -1,5 +1,4 @@
-#ifndef S21_MATRIX_H_
-#define S21_MATRIX_H_
+#pragma once
 
 #include <cmath>
 #include <cstring>
@@ -393,5 +392,3 @@ std::ostream& operator<<(std::ostream& out, const S21Matrix<T> matrix) {
 }
 
 }  // namespace s21
-
-#endif  // S21_MATRIX_H_

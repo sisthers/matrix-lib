@@ -1,5 +1,6 @@
 CC = g++ -Werror -Wextra -Wall -std=c++17
 HEADERS = *.h
+SRCS = console_ui.cc
 TESTS = matrix_tests.cc
 TESTEX = matrix_tests
 PKG = `pkg-config --cflags --libs gtest`
@@ -18,6 +19,9 @@ test: clean $(LIB)
 	$(CC) $(TESTS) $(LIB) -o $(TESTEX) \
 	$(PKG)
 	./$(TESTEX)
+
+fix_style:
+	clang-format -i $(SRCS) $(TESTS) $(HEADERS)
 
 style:
 	clang-format -n $(SRCS) $(TESTS) $(HEADERS)
