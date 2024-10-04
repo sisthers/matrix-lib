@@ -2,7 +2,10 @@
 
 #include <vector>
 
+#include "gauss.h"
 #include "s21_matrix.h"
+
+#define PRESICION 1e-10
 
 TEST(funcs, sum) {
   s21::S21Matrix<double> m1(2, 5);
@@ -648,6 +651,99 @@ TEST(cons, colsgetset_fail) {
     catched = true;
   }
   ASSERT_EQ(catched, true);
+}
+
+TEST(gauss, simple) {
+  std::cout << "Simple method\n";
+  s21::S21Matrix<long double> test_matrix(4, 4);
+  test_matrix(0, 0) = 4.3;
+  test_matrix(0, 1) = 2.8;
+  test_matrix(0, 2) = 1.7;
+  test_matrix(0, 3) = 5 * sqrt(3);
+
+  test_matrix(1, 0) = 2.0;
+  test_matrix(1, 1) = 1.3;
+  test_matrix(1, 2) = 2.5 * sqrt(7);
+  test_matrix(1, 3) = -3.4;
+
+  test_matrix(2, 0) = -3.9;
+  test_matrix(2, 1) = 5.4 * sqrt(5);
+  test_matrix(2, 2) = -1.3;
+  test_matrix(2, 3) = 0.6;
+
+  test_matrix(3, 0) = 1.9 * sqrt(2);
+  test_matrix(3, 1) = -2;
+  test_matrix(3, 2) = 4.8;
+  test_matrix(3, 3) = -1.6;
+
+  std::cout << "Koef matrix: \n" << test_matrix << '\n';
+  s21::S21Matrix<long double> test_free_matrix(4, 1);
+  test_free_matrix(0, 0) = -0.8;
+  test_free_matrix(1, 0) = 1.7;
+  test_free_matrix(2, 0) = -3.8;
+  test_free_matrix(3, 0) = 2;
+  std::cout << "Free members matrix: \n" << test_free_matrix << '\n';
+
+  auto result =
+      s21::Gauss<long double>::SolveSimple(test_matrix, test_free_matrix);
+
+  std::cout << "Result: ";
+  for (const auto &it : result) std::cout << it << " ";
+  std::cout << "\n";
+
+  for (size_t row = 0; row < test_matrix.GetRows(); ++row) {
+    long double res = 0;
+    for (size_t col = 0; col < test_matrix.GetCols(); ++col)
+      res += test_matrix(row, col) * result[col];
+    ASSERT_TRUE(fabs(res - test_free_matrix(row, 0)) < PRESICION);
+  }
+}
+
+TEST(gauss, main_el) {
+  std::cout << "Method with selecting main element\n";
+  s21::S21Matrix<long double> test_matrix(4, 4);
+  test_matrix(0, 0) = 4.3;
+  test_matrix(0, 1) = 2.8;
+  test_matrix(0, 2) = 1.7;
+  test_matrix(0, 3) = 5 * sqrt(3);
+
+  test_matrix(1, 0) = 2.0;
+  test_matrix(1, 1) = 1.3;
+  test_matrix(1, 2) = 2.5 * sqrt(7);
+  test_matrix(1, 3) = -3.4;
+
+  test_matrix(2, 0) = -3.9;
+  test_matrix(2, 1) = 5.4 * sqrt(5);
+  test_matrix(2, 2) = -1.3;
+  test_matrix(2, 3) = 0.6;
+
+  test_matrix(3, 0) = 1.9 * sqrt(2);
+  test_matrix(3, 1) = -2;
+  test_matrix(3, 2) = 4.8;
+  test_matrix(3, 3) = -1.6;
+
+  std::cout << "Koef matrix: \n" << test_matrix << '\n';
+
+  s21::S21Matrix<long double> test_free_matrix(4, 1);
+  test_free_matrix(0, 0) = -0.8;
+  test_free_matrix(1, 0) = 1.7;
+  test_free_matrix(2, 0) = -3.8;
+  test_free_matrix(3, 0) = 2;
+  std::cout << "Free members matrix: \n" << test_free_matrix << '\n';
+
+  auto result = s21::Gauss<long double>::SolveWithMainElementChoice(
+      test_matrix, test_free_matrix);
+
+  std::cout << "Result: ";
+  for (const auto &it : result) std::cout << it << " ";
+  std::cout << "\n";
+
+  for (size_t row = 0; row < test_matrix.GetRows(); ++row) {
+    long double res = 0;
+    for (size_t col = 0; col < test_matrix.GetCols(); ++col)
+      res += test_matrix(row, col) * result[col];
+    ASSERT_TRUE(fabs(res - test_free_matrix(row, 0)) < PRESICION);
+  }
 }
 
 int main(int argc, char **argv) {

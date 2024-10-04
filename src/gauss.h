@@ -13,9 +13,6 @@ class Gauss {
                                     const S21Matrix<T>& free_members_matrix);
   static std::vector<T> SolveWithMainElementChoice(
       const S21Matrix<T>& koef_matrix, const S21Matrix<T>& free_members_matrix);
-
- private:
-  static constexpr double kPrecision = 1e-6;
 };
 
 template <typename T>
@@ -39,9 +36,9 @@ std::vector<T> Gauss<T>::SolveSimple(const S21Matrix<T>& koef_matrix,
 
     for (size_t next_row = row + 1; next_row != temp_matrix.GetRows();
          ++next_row) {
-      T koef = temp_matrix(next_row, row) / temp_matrix(row, row);
+      T koef_ex = temp_matrix(next_row, row) / temp_matrix(row, row);
       for (size_t col = row; col < temp_matrix.GetCols(); ++col)
-        temp_matrix(next_row, col) -= temp_matrix(row, col) * koef;
+        temp_matrix(next_row, col) -= temp_matrix(row, col) * koef_ex;
     }
   }
 
@@ -52,14 +49,10 @@ std::vector<T> Gauss<T>::SolveSimple(const S21Matrix<T>& koef_matrix,
         temp_matrix(prev_row, col) -= temp_matrix(row, col) * koef;
     }
   }
-  std::vector<double> result(temp_matrix.GetRows());
-  for (size_t i = 0; i < result.size(); ++i) {
+  std::vector<T> result(temp_matrix.GetRows());
+  for (size_t i = 0; i < result.size(); ++i)
     result[i] = temp_matrix(i, temp_matrix.GetCols() - 1);
-    std::cout << result[i] << ' ';
-  }
-  std::cout << "\n\n";
-  std::cout << temp_matrix;
-  return std::vector<T>();
+  return result;
 }
 
 template <typename T>
@@ -93,11 +86,11 @@ std::vector<T> Gauss<T>::SolveWithMainElementChoice(
         }
       }
 
-    for (size_t f_col = row; f_col < temp_matrix.GetCols(); ++f_col) {
+    for (size_t f_col = 0; f_col < temp_matrix.GetCols(); ++f_col) {
       std::swap(temp_matrix(row, f_col), temp_matrix(res_row, f_col));
     }
 
-    for (size_t f_row = row; f_row < temp_matrix.GetRows(); ++f_row) {
+    for (size_t f_row = 0; f_row < temp_matrix.GetRows(); ++f_row) {
       std::swap(temp_matrix(f_row, row), temp_matrix(f_row, res_col));
       if (f_row == row) std::swap(change_vector[row], change_vector[res_col]);
     }
@@ -108,9 +101,9 @@ std::vector<T> Gauss<T>::SolveWithMainElementChoice(
 
     for (size_t next_row = row + 1; next_row != temp_matrix.GetRows();
          ++next_row) {
-      T koef = temp_matrix(next_row, row) / temp_matrix(row, row);
+      T koef_ex = temp_matrix(next_row, row) / temp_matrix(row, row);
       for (size_t col = row; col < temp_matrix.GetCols(); ++col)
-        temp_matrix(next_row, col) -= temp_matrix(row, col) * koef;
+        temp_matrix(next_row, col) -= temp_matrix(row, col) * koef_ex;
     }
   }
 
@@ -126,12 +119,6 @@ std::vector<T> Gauss<T>::SolveWithMainElementChoice(
   for (size_t i = 0; i < result.size(); ++i)
     result[change_vector[i]] = temp_matrix(i, temp_matrix.GetCols() - 1);
 
-  for (const auto& it : result) {
-    std::cout << it << " ";
-  }
-
-  std::cout << "\n\n";
-  std::cout << temp_matrix;
   return result;
 }
 

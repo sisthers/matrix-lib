@@ -1,6 +1,5 @@
 CC = g++ -Werror -Wextra -Wall -std=c++17
 HEADERS = *.h
-SRCS = console_ui.cc
 TESTS = matrix_tests.cc
 TESTEX = matrix_tests
 PKG = `pkg-config --cflags --libs gtest`
