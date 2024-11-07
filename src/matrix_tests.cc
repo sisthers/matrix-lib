@@ -13,37 +13,6 @@ double RoundForTests(const uint32_t precision, const double value) {
   return result;
 }
 
-std::tuple<s21::S21Matrix<long double>, s21::S21Matrix<long double>>
-MatrixForTest(const uint32_t precision) {
-  s21::S21Matrix<long double> test_matrix(4, 4);
-  test_matrix(0, 0) = 4.3;
-  test_matrix(0, 1) = 2.8;
-  test_matrix(0, 2) = 1.7;
-  test_matrix(0, 3) = 5 * RoundForTests(precision, sqrt(3));
-
-  test_matrix(1, 0) = 2.0;
-  test_matrix(1, 1) = 1.3;
-  test_matrix(1, 2) = 2.5 * RoundForTests(precision, sqrt(7));
-  test_matrix(1, 3) = -3.4;
-
-  test_matrix(2, 0) = -3.9;
-  test_matrix(2, 1) = 5.4 * RoundForTests(precision, sqrt(5));
-  test_matrix(2, 2) = -1.3;
-  test_matrix(2, 3) = 0.6;
-
-  test_matrix(3, 0) = 1.9 * RoundForTests(precision, sqrt(9));
-  test_matrix(3, 1) = -2;
-  test_matrix(3, 2) = 4.8;
-  test_matrix(3, 3) = -1.6;
-
-  s21::S21Matrix<long double> test_free_matrix(4, 1);
-  test_free_matrix(0, 0) = -0.8;
-  test_free_matrix(1, 0) = 1.7;
-  test_free_matrix(2, 0) = -3.8;
-  test_free_matrix(3, 0) = 2;
-  return std::make_tuple(test_matrix, test_free_matrix);
-}
-
 TEST(funcs, sum) {
   s21::S21Matrix<double> m1(2, 5);
   int c = 0;
@@ -690,54 +659,83 @@ TEST(cons, colsgetset_fail) {
   ASSERT_EQ(catched, true);
 }
 
-TEST(gauss, simple) {
-  for (auto precision : PRECISION_VECTOR) {
-    std::cout << "Simple method, presision: " << precision << "\n";
-    auto matrices = MatrixForTest(precision);
-    auto koef_matrix = std::get<0>(matrices);
-    auto free_matrix = std::get<1>(matrices);
-    std::cout << "Koef matrix: \n" << koef_matrix << '\n';
-    std::cout << "Free members matrix: \n" << free_matrix << '\n';
+std::tuple<s21::S21Matrix<long double>, s21::S21Matrix<long double>>
+MatrixForTest(const uint32_t precision) {
+  s21::S21Matrix<long double> test_matrix(4, 4);
+  test_matrix(0, 0) = 4.3;
+  test_matrix(0, 1) = 2.8;
+  test_matrix(0, 2) = 1.7;
+  test_matrix(0, 3) = 5 * RoundForTests(precision, sqrt(3));
 
-    auto result =
-        s21::Gauss<long double>::SolveSimple(koef_matrix, free_matrix);
+  test_matrix(1, 0) = 2.0;
+  test_matrix(1, 1) = 1.3;
+  test_matrix(1, 2) = 2.5 * RoundForTests(precision, sqrt(7));
+  test_matrix(1, 3) = -3.4;
 
-    std::cout << "Result: ";
-    for (const auto &it : result) std::cout << it << " ";
-    std::cout << "\n";
+  test_matrix(2, 0) = -3.9;
+  test_matrix(2, 1) = 5.4 * RoundForTests(precision, sqrt(5));
+  test_matrix(2, 2) = -1.3;
+  test_matrix(2, 3) = 0.6;
 
-    for (size_t row = 0; row < koef_matrix.GetRows(); ++row) {
-      long double res = 0;
-      for (size_t col = 0; col < koef_matrix.GetCols(); ++col)
-        res += koef_matrix(row, col) * result[col];
-      ASSERT_TRUE(fabs(res - free_matrix(row, 0)) < PRESICION);
-    }
-  }
+  test_matrix(3, 0) = 1.9 * RoundForTests(precision, sqrt(9));
+  test_matrix(3, 1) = -2;
+  test_matrix(3, 2) = 4.8;
+  test_matrix(3, 3) = -1.6;
+
+  s21::S21Matrix<long double> test_free_matrix(4, 1);
+  test_free_matrix(0, 0) = -0.8;
+  test_free_matrix(1, 0) = 1.7;
+  test_free_matrix(2, 0) = -3.8;
+  test_free_matrix(3, 0) = 2;
+  return std::make_tuple(test_matrix, test_free_matrix);
 }
 
-TEST(gauss, main_el) {
+TEST(gauss, simple) {
   for (auto precision : PRECISION_VECTOR) {
-    std::cout << "Method with selecting main element, presision: " << precision
-              << "\n";
+    std::cout << "Presision: " << precision << "\n\n";
     auto matrices = MatrixForTest(precision);
     auto koef_matrix = std::get<0>(matrices);
     auto free_matrix = std::get<1>(matrices);
     std::cout << "Koef matrix: \n" << koef_matrix << '\n';
     std::cout << "Free members matrix: \n" << free_matrix << '\n';
 
-    auto result = s21::Gauss<long double>::SolveWithMainElementChoice(
+    auto result_s =
+        s21::Gauss<long double>::SolveSimple(koef_matrix, free_matrix);
+
+    auto result_m = s21::Gauss<long double>::SolveWithMainElementChoice(
         koef_matrix, free_matrix);
 
-    std::cout << "Result: ";
-    for (const auto &it : result) std::cout << it << " ";
-    std::cout << "\n";
-
+    std::cout << "Result simple: ";
+    for (const auto &it : result_s) std::cout << it << " ";
+    std::cout << "\n\n";
+    long double dif_sum = 0;
     for (size_t row = 0; row < koef_matrix.GetRows(); ++row) {
       long double res = 0;
       for (size_t col = 0; col < koef_matrix.GetCols(); ++col)
-        res += koef_matrix(row, col) * result[col];
-      ASSERT_TRUE(fabs(res - free_matrix(row, 0)) < PRESICION);
+        res += koef_matrix(row, col) * result_s[col];
+      long double dif = fabs(res - free_matrix(row, 0));
+      ASSERT_TRUE(dif < PRESICION);
+      std::cout << "Difference for row " << row + 1 << " = "
+                << fabs(res - free_matrix(row, 0)) << '\n';
+      dif_sum += dif;
     }
+    std::cout << "\nTotal difference = " << dif_sum << "\n\n";
+    std::cout << "Result with selecting main element: ";
+    for (const auto &it : result_m) std::cout << it << " ";
+    std::cout << "\n\n";
+    dif_sum = 0;
+    for (size_t row = 0; row < koef_matrix.GetRows(); ++row) {
+      long double res = 0;
+      for (size_t col = 0; col < koef_matrix.GetCols(); ++col)
+        res += koef_matrix(row, col) * result_m[col];
+      long double dif = fabs(res - free_matrix(row, 0));
+      ASSERT_TRUE(dif < PRESICION);
+      std::cout << "Difference for row " << row + 1 << " = "
+                << fabs(res - free_matrix(row, 0)) << '\n';
+      dif_sum += dif;
+    }
+    std::cout << "\nTotal difference = " << dif_sum << "\n\n";
+    std::cout << "-----------------------------------\n";
   }
 }
 
